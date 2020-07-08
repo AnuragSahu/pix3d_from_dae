@@ -12,7 +12,7 @@ from pycocotools import mask
 # For Correct results Make all the flags True
 # Use these flags as a sanity check for images/masks/mat/binvox
 # Use these flags while development only
-BINVOX_RENDER = False # Turn every thingoff to render everthing
+BINVOX_RENDER = True # Turn every thingoff to render everthing
 
 # This is the scripts that is used to generate the 
 # pix3d dataset train and test splits,
