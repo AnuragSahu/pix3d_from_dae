@@ -52,6 +52,7 @@ pix3d = {
     }
 
 annotations = {
+    "id" : 0,
     "iscrowd" : 0,
     "segmentation" : "", # address to the binary mask of the object
     "model" : "",        # address to the .obj model
@@ -109,15 +110,21 @@ def get_category_id(name):
 def get_K(camd):
 	# https://github.com/facebookresearch/meshrcnn/issues/8
     f_in_mm = camd.lens
+    # f_in_mm is equivalent to f_pix3d
     scene = bpy.context.scene
     resolution_x_in_px = scene.render.resolution_x
     resolution_y_in_px = scene.render.resolution_y
     scale = scene.render.resolution_percentage / 100
     sensor_width_in_mm = camd.sensor_width
+
+    image_width = resolution_x_in_px * scale
+    image_height = resolution_y_in_px * scale
     K = [0,0,0]
-    K[0] = f_in_mm * resolution_x_in_px * scale / 2
-    K[1] = resolution_x_in_px * scale / 2
-    K[2] = resolution_y_in_px * scale / 2
+
+    K[0] = f_in_mm * image_width / sensor_width_in_mm
+    K[1] = image_width / 2
+    K[2] = image_height / 2
+    
     return K
 
 def get_bbox_and_area(msk):
@@ -176,6 +183,7 @@ os.system("mkdir "+images_path)
 
 img_id = 1
 cat_id = 1
+ann_id = 1
 # Iterative loop steps
 for model in models:
     
@@ -251,6 +259,7 @@ for model in models:
 
 		# Fill the annotations json
         annotations_copy = annotations.copy()
+        annotations_copy["id"] = ann_id
         annotations_copy["segmentation"] = msk_path_annotation
         annotations_copy["model"] = mod_path_annotation
         annotations_copy["category_id"] = get_category_id(model)
@@ -267,13 +276,14 @@ for model in models:
 
         # Fill the images json
         image_copy = image.copy()
-        image_copy["height"] = rgb.shape[1]
-        image_copy["width"] = rgb.shape[0]
+        image_copy["height"] = rgb.shape[0]
+        image_copy["width"] = rgb.shape[1]
         image_copy["id"] = img_id
         image_copy["file_name"] = rgb_path_annotation
 
         #increment img_id
         img_id = img_id + 1
+        ann_id = ann_id + 1
 
         # append the imagesto pix3d
         pix3d["images"].append(image_copy)
