@@ -1,1 +1,0 @@
-{"categories": [{"id": 1, "Name": "", "name": "RackB"}], "annotations": [{"iscrowd": 0, "segmentation": "../pix3d_dataset/masks/RackB/0.png", "model": "../pix3d_dataset/models/RackB/model.obj", "category_id": 8, "K": [48000.0, 960.0, 540.0], "bbox": 
