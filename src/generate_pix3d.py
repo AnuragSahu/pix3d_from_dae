@@ -32,7 +32,7 @@ ml_path = "./models"
 models = os.listdir(models_path)
 models.sort()
 
-obj_par_file = open("../src/obj_locations_small.txt", 'r')
+obj_par_file = open("../src/obj_locations_small_2.txt", 'r')
 obj_locations = []
 for line in obj_par_file:
     inner_list = [float(etl.strip()) for etl in line.split(' ')]
@@ -74,10 +74,7 @@ image = {
     "file_name" : ""     # rgb image path mapping
     }
 
-categories = {
-    "id" : 0,
-    "name" : ""
-}
+
 
 def delete_models():
     collection_name = "Collection"
@@ -101,7 +98,7 @@ def mask_from_depth(img):
                 img[r,c] = 255
     return img
 
-def get_category_id(name):
+def get_category_id_old_version(name):
 	# Hardcoded this function
 	ret = 1
 	if(name == "BoxA"):
@@ -120,6 +117,17 @@ def get_category_id(name):
 		ret = 7
 	category_id = ret
 	return category_id
+
+def get_category_id(name):
+	# Hardcoded this function
+	ret = 1
+	if(name[:-1] == "Box"):
+		ret = 1
+	elif(name[:-1] == "Rack"):
+		ret = 2
+	category_id = ret
+	return category_id
+
 
 def get_K(camd):
 	# https://github.com/facebookresearch/meshrcnn/issues/8
@@ -188,17 +196,29 @@ os.system("rm -rf "+masks_path)
 os.system("mkdir "+masks_path)
 os.system("mkdir "+images_path)
 
+################### HARDCODED PART ##############################
+
+
+## set the category ids and names here
+
+categories = {
+    "id" : 1,
+    "name" : "Box"
+}
+pix3d["categories"].append(categories)
+
+categories = {
+    "id" : 2,
+    "name" : "Rack"
+}
+pix3d["categories"].append(categories)
+
 img_id = 1
-cat_id = 1
 ann_id = 1
 # Iterative loop steps
 for model in models:
     
-    categories_copy = categories.copy()
-    categories_copy["id"] = cat_id
-    categories_copy["name"] = model
-    cat_id = cat_id + 1
-    pix3d["categories"].append(categories_copy)
+    
 
     # 1. Clear all obj files
     delete_models()
@@ -332,4 +352,4 @@ for model in models:
 with open('../pix3d/pix3d_s1_train.json', 'w+') as outfile:
     json.dump(pix3d, outfile)
 
-gc.collect()
+print("Created the annotations :)\n")
