@@ -16,7 +16,7 @@ from pycocotools import mask
 # Use these flags as a sanity check for images/masks/mat/binvox
 # Use these flags while development only
 BINVOX_RENDER = False # Turn flag TRUE to render everthing
-RENDER_IMAGES = True # Turn flag TRUE to render everthing
+RENDER_IMAGES = True # Dont make this False other
 
 # This is the scripts that is used to generate the 
 # pix3d dataset train and test splits,
@@ -32,11 +32,17 @@ ml_path = "./models"
 models = os.listdir(models_path)
 models.sort()
 
-obj_par_file = open("../src/obj_locations_small_2.txt", 'r')
+obj_par_file = open("../src/box_locations.txt", 'r')
 obj_locations = []
 for line in obj_par_file:
     inner_list = [float(etl.strip()) for etl in line.split(' ')]
     obj_locations.append(inner_list)
+
+obj_par_file = open("../src/rack_locations.txt", 'r')
+rack_locations = []
+for line in obj_par_file:
+    inner_list = [float(etl.strip()) for etl in line.split(' ')]
+    rack_locations.append(inner_list)
 
 
 pix3d = {
@@ -217,8 +223,6 @@ img_id = 1
 ann_id = 1
 # Iterative loop steps
 for model in models:
-    
-    
 
     # 1. Clear all obj files
     delete_models()
@@ -258,11 +262,19 @@ for model in models:
     os.mkdir(images_path + "/" + model)
     os.mkdir(masks_path + "/" + model)
 
-    for loc_number in range(len(obj_locations)):
+    # For objects
+    if(model[:-1] == "Box"):
+        iterations = len(obj_locations)
+    else:
+        iterations = len(rack_locations)
 
-        # Set camera positions
-        #camera.location = obj_locations[loc_number][:3] #set the camera location and angles
-        #camera.rotation_euler = obj_locations[loc_number][3:] #[1.57, 0 , 1.57]
+    for loc_number in range(iterations):
+        if(model[:-1] == "Box"):
+            location = obj_locations[loc_number][:3] #set the camera location and angles
+            rotation_euler = obj_locations[loc_number][3:]
+        else:
+            location = rack_locations[loc_number][:3]
+            rotation_euler = rack_locations[loc_number][3:]
         
         trans_vector = [0, 0, 0]
         euler_vector = [0, np.pi, 0]
@@ -276,12 +288,14 @@ for model in models:
         # Change the object location instead of the camera
         # inspired from https://github.com/xingyuansun/pix3d/blob/e0fc891041e8c3d381240e3d699ba734a50d26c5/demo.py#L77
         obj = bpy.data.objects[model]
-        obj.location = obj_locations[loc_number][:3] #set the camera location and angles
-        obj.rotation_euler = obj_locations[loc_number][3:]
+        
+        obj.location = location
+        obj.rotation_euler = rotation_euler
 
         # get the trans and rot matrix of the object
-        trans_mat = obj_locations[loc_number][:3]
-        euler_vector = obj_locations[loc_number][3:]
+        trans_mat = location
+        euler_vector = rotation_euler
+
         eul = Euler(euler_vector,'XYZ')
         rot_mat = eul.to_matrix()
         rot_mat = MatrixToList(rot_mat) # change the Matrix to list
