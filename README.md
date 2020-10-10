@@ -80,3 +80,4 @@ cd ./blender/
 ./blender --background -P ../pix3d_dataset/src/generate_pix3d.py
 ```
 
+## Note : To get the locations file I have created a YouTube Video <a href="https://youtu.be/UrdTbzC4ZVI"> Link </a>
